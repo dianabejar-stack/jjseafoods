@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Guía del Equipo — JJ SeaFoods</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      font-size: 13px;
+      color: #1a1a1a;
+      background: #fff;
+      padding: 40px 60px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    /* ── Portada ── */
+    .cover {
+      background: linear-gradient(135deg, #1F7A63, #3AAE8D);
+      color: white;
+      border-radius: 12px;
+      padding: 48px 40px;
+      margin-bottom: 40px;
+      text-align: center;
+    }
+    .cover .logo {
+      width: 72px; height: 72px;
+      background: white;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 16px;
+      font-size: 26px; font-weight: 900;
+      color: #1F7A63;
+    }
+    .cover h1 { font-size: 28px; font-weight: 800; margin-bottom: 6px; }
+    .cover p  { font-size: 15px; opacity: 0.9; }
+    .cover .badge {
+      display: inline-block;
+      margin-top: 16px;
+      background: rgba(255,255,255,0.2);
+      border: 1px solid rgba(255,255,255,0.4);
+      border-radius: 20px;
+      padding: 4px 16px;
+      font-size: 12px;
+    }
+
+    /* ── Secciones ── */
+    .part {
+      border-left: 5px solid #1F7A63;
+      padding-left: 16px;
+      margin: 36px 0 20px;
+    }
+    .part h2 {
+      font-size: 17px;
+      font-weight: 800;
+      color: #1F7A63;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .part p { font-size: 12px; color: #666; margin-top: 2px; }
+
+    h3 {
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin: 24px 0 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    h3 .num {
+      background: #1F7A63;
+      color: white;
+      border-radius: 50%;
+      width: 22px; height: 22px;
+      display: inline-flex;
+      align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    p, li { line-height: 1.7; }
+    ul, ol { padding-left: 20px; margin: 6px 0; }
+    li { margin-bottom: 3px; }
+
+    /* ── Código ── */
+    pre {
+      background: #1e1e2e;
+      color: #cdd6f4;
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      overflow-x: auto;
+      margin: 10px 0;
+    }
+    code {
+      background: #e8f5f1;
+      color: #1F7A63;
+      border-radius: 4px;
+      padding: 1px 6px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      font-size: 12px;
+    }
+    pre code { background: none; color: inherit; padding: 0; }
+
+    /* Comentarios en bloques de código */
+    .cm { color: #6c7086; }
+    .kw { color: #89b4fa; }
+    .st { color: #a6e3a1; }
+
+    /* ── Aviso ── */
+    .note {
+      background: #fff8e6;
+      border-left: 4px solid #f0a500;
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      margin: 10px 0;
+      font-size: 12px;
+      color: #7a5000;
+    }
+    .note strong { color: #c07a00; }
+
+    .tip {
+      background: #e8f5f1;
+      border-left: 4px solid #1F7A63;
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      margin: 10px 0;
+      font-size: 12px;
+      color: #1a4a3a;
+    }
+
+    /* ── Tabla ── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 12.5px;
+    }
+    thead tr { background: #1F7A63; color: white; }
+    thead th { padding: 9px 12px; text-align: left; font-weight: 600; }
+    tbody tr:nth-child(even) { background: #f4faf8; }
+    tbody td { padding: 8px 12px; border-bottom: 1px solid #e0ece9; }
+    tbody td a { color: #1F7A63; }
+
+    /* ── Flujo visual ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin: 16px 0;
+      flex-wrap: wrap;
+    }
+    .flow-step {
+      background: #f4faf8;
+      border: 2px solid #3AAE8D;
+      border-radius: 8px;
+      padding: 10px 16px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      color: #1F7A63;
+      min-width: 110px;
+    }
+    .flow-arrow {
+      font-size: 20px;
+      color: #3AAE8D;
+      padding: 0 8px;
+    }
+
+    /* ── Dos columnas ── */
+    .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 12px 0; }
+    .card {
+      border: 1px solid #d0e8e2;
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .card h4 { font-size: 13px; color: #1F7A63; margin-bottom: 6px; }
+
+    /* ── Footer ── */
+    .footer {
+      margin-top: 48px;
+      border-top: 2px solid #e0ece9;
+      padding-top: 16px;
+      text-align: center;
+      font-size: 11px;
+      color: #999;
+    }
+
+    /* ── Print ── */
+    @media print {
+      body { padding: 20px 30px; }
+      pre { page-break-inside: avoid; }
+      h3  { page-break-after: avoid; }
+      .part { page-break-before: auto; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- PORTADA -->
+<div class="cover">
+  <div class="logo">JJ</div>
+  <h1>JJ SeaFoods — Sistema de Trazabilidad</h1>
+  <p>Guía de configuración y despliegue para el equipo de desarrollo</p>
+  <span class="badge">Stack: React · Node.js · PostgreSQL · Render · Vercel</span>
+</div>
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PARTE 1 -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="part">
+  <h2>Parte 1 — Configurar el proyecto en una nueva computadora</h2>
+  <p>Seguir estos pasos en orden. Solo se realizan una vez por máquina.</p>
+</div>
+
+<h3><span class="num">1</span> Instalar herramientas</h3>
+<ul>
+  <li><strong>Node.js</strong> (versión LTS) → <code>https://nodejs.org</code> → instalar con opciones por defecto</li>
+  <li><strong>Git</strong> → <code>https://git-scm.com</code> → instalar con opciones por defecto</li>
+  <li><strong>VS Code</strong> → <code>https://code.visualstudio.com</code></li>
+</ul>
+<div class="tip">Después de instalar Node.js, reiniciar VS Code para que reconozca el comando <code>npm</code>.</div>
+
+<h3><span class="num">2</span> Clonar el proyecto desde GitHub</h3>
+<p>Abrir VS Code → menú <strong>Terminal → New Terminal</strong> → cambiar terminal a <strong>Git Bash</strong>:</p>
+<pre><code><span class="cm"># Ir a la carpeta de inicio y clonar</span>
+cd ~
+git clone https://github.com/dianabejar-stack/jjseafoods.git
+cd jjseafoods</code></pre>
+
+<h3><span class="num">3</span> Instalar dependencias</h3>
+<pre><code><span class="cm"># Dependencias del servidor</span>
+cd server
+npm install
+
+<span class="cm"># Dependencias del cliente</span>
+cd ../client
+npm install</code></pre>
+
+<h3><span class="num">4</span> Crear el archivo <code>.env</code> del servidor</h3>
+<pre><code>cd ../server</code></pre>
+<p>Crear un archivo llamado <strong>.env</strong> (sin extensión) con el siguiente contenido:</p>
+<pre><code>PORT=3001
+DATABASE_URL=postgresql://jjseafoods_db_user:BTJq5u04yStKFZ5nJfKUYZIH8oiuthqg@dpg-d6mvr6s50q8c73as0avg-a.oregon-postgres.render.com/jjseafoods_db</code></pre>
+<div class="note"><strong>Importante:</strong> Este archivo <code>.env</code> nunca se sube a GitHub (está protegido en <code>.gitignore</code>). Cada persona del equipo debe crearlo manualmente en su computadora.</div>
+
+<h3><span class="num">5</span> Crear el archivo <code>.env</code> del cliente</h3>
+<pre><code>cd ../client</code></pre>
+<p>Crear un archivo llamado <strong>.env</strong> con este contenido:</p>
+<pre><code>VITE_API_URL=</code></pre>
+<div class="tip">Dejar vacío para desarrollo local. El proxy de Vite redirige las llamadas <code>/api</code> al backend automáticamente.</div>
+
+<h3><span class="num">6</span> Levantar el proyecto localmente</h3>
+<p>Abrir <strong>dos terminales</strong> en VS Code:</p>
+
+<div class="two-col">
+  <div class="card">
+    <h4>Terminal 1 — Backend</h4>
+    <pre style="font-size:11px"><code>cd ~/jjseafoods/server
+npm run dev</code></pre>
+    <p style="font-size:11px;margin-top:6px">Debe mostrar:<br><code>Servidor corriendo en puerto 3001</code></p>
+  </div>
+  <div class="card">
+    <h4>Terminal 2 — Frontend</h4>
+    <pre style="font-size:11px"><code>cd ~/jjseafoods/client
+npm run dev</code></pre>
+    <p style="font-size:11px;margin-top:6px">Debe mostrar:<br><code>Local: http://localhost:5173</code></p>
+  </div>
+</div>
+
+<p>Abrir <strong>http://localhost:5173</strong> en el navegador para ver la aplicación.</p>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PARTE 2 -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="part">
+  <h2>Parte 2 — Desplegar cambios a producción</h2>
+  <p>El despliegue es automático: basta con hacer <code>git push</code> a GitHub.</p>
+</div>
+
+<h3><span class="num">1</span> Flujo de despliegue</h3>
+<div class="flow">
+  <div class="flow-step">Editar código<br>en VS Code</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">git commit<br>+ git push</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">GitHub<br>detecta cambio</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-step">Render<br>redespliega API</div>
+  <div class="flow-arrow">+</div>
+  <div class="flow-step">Vercel<br>redespliega web</div>
+</div>
+
+<h3><span class="num">2</span> Comandos Git del día a día</h3>
+<pre><code><span class="cm"># 1. Obtener los últimos cambios del equipo (hacer SIEMPRE antes de empezar)</span>
+git pull
+
+<span class="cm"># 2. Ver qué archivos cambiaron</span>
+git status
+
+<span class="cm"># 3. Agregar los archivos modificados</span>
+git add nombre-del-archivo.js
+<span class="cm"># (o para agregar todos los cambios)</span>
+git add .
+
+<span class="cm"># 4. Guardar cambios con mensaje descriptivo</span>
+git commit -m "descripción de lo que se cambió"
+
+<span class="cm"># 5. Subir a GitHub → dispara redespliegue automático</span>
+git push</code></pre>
+
+<h3><span class="num">3</span> Tiempos de despliegue</h3>
+<table>
+  <thead>
+    <tr><th>Servicio</th><th>Qué hace</th><th>Tiempo aproximado</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>Render</strong> (backend/API)</td><td>Redespliega el servidor Node.js automáticamente</td><td>~2 minutos</td></tr>
+    <tr><td><strong>Vercel</strong> (frontend)</td><td>Redespliega la aplicación React automáticamente</td><td>~1 minuto</td></tr>
+  </tbody>
+</table>
+
+<h3><span class="num">4</span> Verificar que el despliegue funcionó</h3>
+<ul>
+  <li><strong>Backend:</strong> <code>https://jjseafoods-api.onrender.com/api/health</code> → debe responder <code>{"status":"ok"}</code></li>
+  <li><strong>Frontend:</strong> <code>https://jjseafoods.vercel.app</code> → ver los cambios en vivo</li>
+</ul>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PARTE 3 -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="part">
+  <h2>Parte 3 — URLs y recursos del proyecto</h2>
+</div>
+
+<table>
+  <thead>
+    <tr><th>Recurso</th><th>URL</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Repositorio GitHub</td><td><a href="https://github.com/dianabejar-stack/jjseafoods">github.com/dianabejar-stack/jjseafoods</a></td></tr>
+    <tr><td>Dashboard (producción)</td><td><a href="https://jjseafoods.vercel.app">jjseafoods.vercel.app</a></td></tr>
+    <tr><td>API (producción)</td><td><a href="https://jjseafoods-api.onrender.com">jjseafoods-api.onrender.com</a></td></tr>
+    <tr><td>Panel de Render</td><td><a href="https://dashboard.render.com">dashboard.render.com</a></td></tr>
+    <tr><td>Panel de Vercel</td><td><a href="https://vercel.com/dashboard">vercel.com/dashboard</a></td></tr>
+  </tbody>
+</table>
+
+
+<!-- ══════════════════════════════════════════════════════ -->
+<!-- PARTE 4 -->
+<!-- ══════════════════════════════════════════════════════ -->
+<div class="part">
+  <h2>Parte 4 — Solución a problemas comunes</h2>
+</div>
+
+<h3>❌ <code>npm</code> no se reconoce como comando</h3>
+<p>Reiniciar VS Code después de instalar Node.js. Si sigue fallando, verificar que Node.js quedó instalado ejecutando <code>node --version</code> en Git Bash.</p>
+
+<h3>❌ <code>git push</code> pide contraseña y falla</h3>
+<p>GitHub ya no acepta contraseñas normales. Se necesita un <strong>Personal Access Token</strong>:</p>
+<ol>
+  <li>Ir a GitHub → avatar → <strong>Settings → Developer settings → Personal access tokens → Tokens (classic)</strong></li>
+  <li>Clic en <strong>Generate new token (classic)</strong></li>
+  <li>Marcar el permiso <strong>repo</strong> → generar</li>
+  <li>Copiar el token y usarlo como contraseña cuando Git lo pida</li>
+</ol>
+
+<h3>❌ El dashboard muestra ceros en producción</h3>
+<p>El backend de Render en plan gratuito se "duerme" tras 15 min de inactividad. Al primer acceso tarda ~30 segundos en despertar. <strong>Esperar y recargar la página.</strong></p>
+
+<h3>❌ Los cambios no aparecen en producción</h3>
+<ol>
+  <li>Verificar que el <code>git push</code> fue exitoso (sin errores en terminal)</li>
+  <li>Revisar el panel de <a href="https://dashboard.render.com">Render</a> para ver el estado del despliegue del backend</li>
+  <li>Revisar el panel de <a href="https://vercel.com/dashboard">Vercel</a> para ver el estado del despliegue del frontend</li>
+</ol>
+
+<h3>❌ Error al conectar a la base de datos localmente</h3>
+<p>Verificar que el archivo <code>server/.env</code> existe y contiene la variable <code>DATABASE_URL</code> correctamente (ver Paso 4).</p>
+
+
+<!-- FOOTER -->
+<div class="footer">
+  JJ SeaFoods · Sistema de Trazabilidad de Recepción de Pesca · Equipo de Desarrollo
+</div>
+
+</body>
+</html>
