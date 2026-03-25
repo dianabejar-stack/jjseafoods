@@ -1,116 +1,119 @@
 /**
  * App.jsx
- * Componente raíz de la aplicación JJ SeaFoods
- * Gestiona la navegación entre las distintas vistas del sistema
+ * Componente raíz — gestiona autenticación y navegación por permisos.
+ * El navbar muestra solo las vistas a las que el usuario tiene acceso.
  */
-
 import { useState } from 'react'
+import { useAuth, AuthProvider } from './context/AuthContext'
 
-// Vistas originales (prototipo inicial)
-import Dashboard from './pages/Dashboard'
-import RecepcionForm from './pages/RecepcionForm'
+import LoginPage          from './pages/LoginPage'
+import DashboardFiltrado  from './pages/DashboardFiltrado'
+import RecepcionCalidad   from './pages/RecepcionCalidad'
+import AprobacionesPage   from './pages/AprobacionesPage'
+import AdminUsuarios      from './pages/AdminUsuarios'
 
-// Vistas nuevas (versión con filtros y formularios de calidad detallados)
-import DashboardFiltrado from './pages/DashboardFiltrado'
-import RecepcionCalidad from './pages/RecepcionCalidad'
-
-// ─── Opciones de navegación ────────────────────────────────────────────────
-// Cada entrada define el id de la vista, el texto del botón y si es "nuevo"
-const NAV_ITEMS = [
-  { id: 'dashboard-v2',     label: 'Dashboard',       nuevo: false },
-  { id: 'recepcion-calidad', label: 'Nueva Recepción', nuevo: false },
+// ── Vistas disponibles en el navbar ──────────────────────────────────────────
+// permiso: código requerido para que el botón aparezca
+const VISTAS = [
+  { id: 'dashboard',    label: 'Dashboard',       permiso: 'vista_dashboard'  },
+  { id: 'registro',     label: 'Nueva Recepción', permiso: 'vista_registro'   },
+  { id: 'aprobaciones', label: 'Aprobaciones',    permiso: 'vista_aprobacion' },
+  { id: 'admin',        label: 'Usuarios',        permiso: 'vista_admin'      },
 ]
 
-function App() {
-  // Vista activa: empieza en el dashboard filtrado (nueva versión)
-  const [vista, setVista] = useState('dashboard-v2')
+// ── Layout principal (usuario autenticado) ────────────────────────────────────
+function AppLayout() {
+  const { usuario, logout, tiene } = useAuth()
+
+  // Primera vista accesible como estado inicial
+  const vistaInicial = VISTAS.find(v => tiene(v.permiso))?.id ?? 'dashboard'
+  const [vista, setVista] = useState(vistaInicial)
+
+  const navItems = VISTAS.filter(v => tiene(v.permiso))
 
   return (
     <div className="min-h-screen bg-gray-50">
 
-      {/* ── Barra de navegación superior ──────────────────────────── */}
+      {/* ── Navbar ─────────────────────────────────────────────────── */}
       <header className="bg-[#1F7A63] text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
 
           {/* Logo + nombre */}
           <div className="flex items-center gap-3">
-            {/* Logo: coloca logo.png en client/public/ para mostrarlo */}
             <img
               src="/logo.png"
               alt="JJ SeaFoods"
               className="w-12 h-12 object-contain rounded-full bg-white p-0.5"
-              onError={(e) => {
-                // Si no existe la imagen, muestra el texto "JJ"
+              onError={e => {
                 e.currentTarget.style.display = 'none'
                 e.currentTarget.nextElementSibling.style.display = 'flex'
               }}
             />
-            {/* Fallback de logo (visible solo si la imagen falla) */}
-            <div
-              className="w-12 h-12 bg-white rounded-full items-center justify-center hidden"
-              aria-hidden="true"
-            >
+            <div className="w-12 h-12 bg-white rounded-full items-center justify-center hidden" aria-hidden>
               <span className="text-[#1F7A63] font-bold text-sm">JJ</span>
             </div>
-
             <div>
               <h1 className="text-xl font-bold leading-tight">JJ SeaFoods</h1>
               <p className="text-xs text-green-200">Sistema de Trazabilidad</p>
             </div>
           </div>
 
-          {/* Botones de navegación */}
-          <nav className="flex flex-wrap gap-2">
-            {NAV_ITEMS.map(({ id, label, nuevo }) => (
-              <button
-                key={id}
-                onClick={() => setVista(id)}
-                className={`relative px-3 py-1.5 rounded-lg text-sm font-medium transition ${
-                  vista === id
-                    ? 'bg-white text-[#1F7A63]'
-                    : 'text-white hover:bg-[#2a9478]'
-                }`}
-              >
-                {label}
-                {/* Indicador "Nuevo" en versiones actualizadas */}
-                {nuevo && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-yellow-400 text-yellow-900 text-[9px] font-bold px-1 rounded-full leading-tight">
-                    NEW
-                  </span>
-                )}
-              </button>
-            ))}
-          </nav>
+          {/* Botones de navegación + usuario */}
+          <div className="flex flex-wrap items-center gap-2">
+            <nav className="flex flex-wrap gap-2">
+              {navItems.map(({ id, label }) => (
+                <button
+                  key={id}
+                  onClick={() => setVista(id)}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition
+                    ${vista === id
+                      ? 'bg-white text-[#1F7A63]'
+                      : 'text-white hover:bg-[#2a9478]'}`}
+                >
+                  {label}
+                </button>
+              ))}
+            </nav>
 
+            {/* Info usuario + cerrar sesión */}
+            <div className="flex items-center gap-2 ml-2 border-l border-green-600 pl-3">
+              <div className="text-right hidden sm:block">
+                <p className="text-xs font-medium">{usuario.nombre}</p>
+                <p className="text-xs text-green-300">{usuario.rol}</p>
+              </div>
+              <button
+                onClick={logout}
+                title="Cerrar sesión"
+                className="text-xs text-green-200 hover:text-white transition px-2 py-1 rounded hover:bg-[#2a9478]"
+              >
+                Salir
+              </button>
+            </div>
+          </div>
         </div>
       </header>
 
-      {/* ── Contenido principal ────────────────────────────────────── */}
+      {/* ── Contenido principal ─────────────────────────────────────── */}
       <main>
-        {vista === 'dashboard-v2' && (
-          <DashboardFiltrado onNavigate={setVista} />
-        )}
-
-        {vista === 'recepcion-calidad' && (
-          <RecepcionCalidad onVolver={() => setVista('dashboard-v2')} />
-        )}
-
-        {/* Vistas originales (prototipo inicial) */}
-        {vista === 'dashboard-v1' && (
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <Dashboard />
-          </div>
-        )}
-
-        {vista === 'recepcion-v1' && (
-          <div className="max-w-7xl mx-auto px-4 py-6">
-            <RecepcionForm onGuardado={() => setVista('dashboard-v1')} />
-          </div>
-        )}
+        {vista === 'dashboard'    && <DashboardFiltrado onNavigate={setVista} />}
+        {vista === 'registro'     && <RecepcionCalidad  onVolver={() => setVista('dashboard')} />}
+        {vista === 'aprobaciones' && <AprobacionesPage />}
+        {vista === 'admin'        && <AdminUsuarios />}
       </main>
-
     </div>
   )
 }
 
-export default App
+// ── Raíz: decide si mostrar login o app ───────────────────────────────────────
+function Root() {
+  const { usuario } = useAuth()
+  return usuario ? <AppLayout /> : <LoginPage />
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <Root />
+    </AuthProvider>
+  )
+}

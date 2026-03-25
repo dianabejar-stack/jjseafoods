@@ -130,6 +130,12 @@ router.post('/camaron', async (req, res) => {
       ]
     )
 
+    // Crear registro de aprobación en estado pendiente
+    await client.query(
+      'INSERT INTO aprobaciones (recepcion_calidad_id) VALUES ($1)',
+      [idRec]
+    )
+
     await client.query('COMMIT')
     res.status(201).json({ ok: true, id: idRec, nroRecepcion })
   } catch (err) {
@@ -210,6 +216,12 @@ router.post('/pescado', async (req, res) => {
         ]
       )
     }
+
+    // Crear registro de aprobación en estado pendiente
+    await client.query(
+      'INSERT INTO aprobaciones (recepcion_calidad_id) VALUES ($1)',
+      [idRec]
+    )
 
     await client.query('COMMIT')
     res.status(201).json({ ok: true, id: idRec, nroRecepcion })

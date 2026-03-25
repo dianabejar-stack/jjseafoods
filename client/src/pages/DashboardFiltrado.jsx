@@ -17,6 +17,7 @@ import {
   AreaChart, Area, CartesianGrid,
 } from 'recharts'
 import api from '../api'
+import { useAuth } from '../context/AuthContext'
 
 // =====================================================
 // === Constantes de color — Paleta verde JJ SeaFoods ===
@@ -512,20 +513,23 @@ function GrillaTemperatura({ lecturas = [] }) {
 // Props:
 //   onNavigate — función opcional para navegar a otra ruta (ej. formulario de recepción)
 export default function DashboardFiltrado({ onNavigate }) {
+  const { tiene } = useAuth()
+
   // Filtro activo: 'all' | 'camaron' | 'pescado'
   const [filtro, setFiltro] = useState('all')
 
   // Estado para todos los datos cargados desde la API
-  const [kpis,         setKpis]        = useState([])
-  const [barTitle,     setBarTitle]    = useState('')
-  const [barData,      setBarData]     = useState([])
-  const [trendTitle,   setTrendTitle]  = useState('')
-  const [trendData,    setTrendData]   = useState([])
-  const [proveedores,  setProveedores] = useState([])  // para gráfica de dona
-  const [tablaHoy,     setTablaHoy]    = useState([])
-  const [alertas,      setAlertas]     = useState([])
-  const [temperaturas, setTemperaturas]= useState([])
-  const [cargando,     setCargando]    = useState(true)
+  const [kpis,            setKpis]           = useState([])
+  const [barTitle,        setBarTitle]       = useState('')
+  const [barData,         setBarData]        = useState([])
+  const [trendTitle,      setTrendTitle]     = useState('')
+  const [trendData,       setTrendData]      = useState([])
+  const [proveedores,     setProveedores]    = useState([])
+  const [tablaHoy,        setTablaHoy]       = useState([])
+  const [alertas,         setAlertas]        = useState([])
+  const [temperaturas,    setTemperaturas]   = useState([])
+  const [cargando,        setCargando]       = useState(true)
+  const [kpisAprobacion,  setKpisAprobacion] = useState(null)
 
   // Convierte '2026-03-23' → '23-Mar' para el eje X de tendencia
   const formatFecha = (fechaStr) => {
@@ -671,6 +675,14 @@ export default function DashboardFiltrado({ onNavigate }) {
       .finally(() => setCargando(false))
   }, [filtro])   // se re-ejecuta cada vez que el usuario cambia de chip
 
+  // Carga KPIs de aprobaciones (solo si el usuario tiene el permiso)
+  useEffect(() => {
+    if (!tiene('ind_aprobacion')) return
+    api.get('/api/aprobaciones/kpis')
+      .then(r => setKpisAprobacion(r.data))
+      .catch(() => {})
+  }, [tiene])
+
   // Chips de filtro
   const chips = [
     { key: 'all',     label: '🌐 General', colorActivo: COLOR.darkGreen },
@@ -703,7 +715,7 @@ export default function DashboardFiltrado({ onNavigate }) {
           {/* Botón para ir al formulario de recepción */}
           {onNavigate && (
             <button
-              onClick={() => onNavigate('recepcion-calidad')}
+              onClick={() => onNavigate('registro')}
               style={{
                 background:   COLOR.mainGreen,
                 color:        '#fff',
@@ -751,6 +763,40 @@ export default function DashboardFiltrado({ onNavigate }) {
                 <TarjetaKPI key={idx} {...kpi} />
               ))}
             </div>
+
+            {/* ---- KPIs de aprobaciones (visible solo con permiso ind_aprobacion) ---- */}
+            {tiene('ind_aprobacion') && kpisAprobacion && (
+              <div style={{ marginBottom: '20px' }}>
+                <p style={{ fontSize: '12px', fontWeight: 700, color: COLOR.textMuted,
+                            textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>
+                  Estado de aprobaciones
+                </p>
+                <div style={{
+                  display:             'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                  gap:                 '10px',
+                }}>
+                  {[
+                    { label: 'Pendientes',      value: kpisAprobacion.pendientes,     color: '#d97706' },
+                    { label: 'Aprobados',        value: kpisAprobacion.aprobados,      color: COLOR.ok },
+                    { label: 'Rechazados',       value: kpisAprobacion.rechazados,     color: COLOR.danger },
+                    { label: 'Registros hoy',    value: kpisAprobacion.registros_hoy,  color: COLOR.darkGreen },
+                    { label: 'Aprobados hoy',    value: kpisAprobacion.aprobados_hoy,  color: COLOR.mainGreen },
+                    { label: 'Tasa aprobación',  value: kpisAprobacion.tasa_aprobacion != null
+                                                          ? `${kpisAprobacion.tasa_aprobacion}%` : '—',
+                                                  color: COLOR.darkGreen },
+                  ].map(({ label, value, color }) => (
+                    <div key={label} style={{
+                      background: COLOR.cardBg, border: `1px solid ${COLOR.border}`,
+                      borderRadius: '10px', padding: '12px 16px', textAlign: 'center',
+                    }}>
+                      <p style={{ margin: 0, fontSize: '22px', fontWeight: 800, color }}>{value ?? '—'}</p>
+                      <p style={{ margin: '4px 0 0', fontSize: '11px', color: COLOR.textMuted }}>{label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* ---- Barras + Dona (colapsa a 1 columna en móvil) ---- */}
             <div style={{
