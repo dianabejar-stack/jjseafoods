@@ -19,8 +19,6 @@ import RecepcionCalidad from './pages/RecepcionCalidad'
 const NAV_ITEMS = [
   { id: 'dashboard-v2',     label: 'Dashboard',       nuevo: false },
   { id: 'recepcion-calidad', label: 'Nueva Recepción', nuevo: false },
-  { id: 'dashboard-v1',     label: 'Dashboard v1',    nuevo: false },
-  { id: 'recepcion-v1',     label: 'Recepción v1',    nuevo: false },
 ]
 
 function App() {
