@@ -22,6 +22,9 @@ app.use('/api/dashboard',            require('./routes/dashboard'));
 app.use('/api/recepciones-calidad',  require('./routes/recepcionesCalidad'));
 app.use('/api/dashboard/calidad',    require('./routes/dashboardCalidad'));
 
+// ── Mantenimientos (v3) ───────────────────────────────────────────────
+app.use('/api/mantenimientos',       require('./routes/mantenimientos'));
+
 // Health check
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'JJ SeaFoods API funcionando' });

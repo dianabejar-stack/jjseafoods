@@ -23,10 +23,12 @@ const ROLES = [
 
 const PERMISOS = [
   // Vistas (acceso a páginas)
-  { codigo: 'vista_dashboard',  descripcion: 'Ver el Dashboard',                categoria: 'vista' },
-  { codigo: 'vista_registro',   descripcion: 'Registrar productos del mar',      categoria: 'vista' },
-  { codigo: 'vista_aprobacion', descripcion: 'Revisar y aprobar registros',      categoria: 'vista' },
-  { codigo: 'vista_admin',      descripcion: 'Administrar usuarios y permisos',  categoria: 'vista' },
+  { codigo: 'vista_recepciones',    descripcion: 'Ver listado de recepciones realizadas',    categoria: 'vista' },
+  { codigo: 'vista_dashboard',      descripcion: 'Ver el Dashboard',                         categoria: 'vista' },
+  { codigo: 'vista_registro',       descripcion: 'Registrar productos del mar',               categoria: 'vista' },
+  { codigo: 'vista_aprobacion',     descripcion: 'Revisar registros (revisiones)',            categoria: 'vista' },
+  { codigo: 'vista_mantenimientos', descripcion: 'Acceder a los mantenimientos del sistema', categoria: 'vista' },
+  { codigo: 'vista_admin',          descripcion: 'Administrar usuarios y permisos',          categoria: 'vista' },
   // Indicadores (KPIs visibles en el dashboard)
   { codigo: 'ind_general',      descripcion: 'KPIs generales del dashboard',     categoria: 'indicador' },
   { codigo: 'ind_camaron',      descripcion: 'Indicadores específicos camarón',  categoria: 'indicador' },
@@ -36,12 +38,13 @@ const PERMISOS = [
 
 // Permisos por defecto para cada rol (lista de códigos)
 const ROL_PERMISOS = {
-  Administrador: ['vista_dashboard', 'vista_registro', 'vista_aprobacion', 'vista_admin',
+  Administrador: ['vista_recepciones', 'vista_dashboard', 'vista_registro', 'vista_aprobacion',
+                  'vista_mantenimientos', 'vista_admin',
                   'ind_general', 'ind_camaron', 'ind_pescado', 'ind_aprobacion'],
-  Gerente:       ['vista_dashboard', 'vista_registro', 'vista_aprobacion',
+  Gerente:       ['vista_recepciones', 'vista_dashboard', 'vista_registro', 'vista_aprobacion',
                   'ind_general', 'ind_camaron', 'ind_pescado', 'ind_aprobacion'],
   Operativo:     ['vista_registro'],
-  Supervisor:    ['vista_dashboard', 'vista_registro', 'vista_aprobacion',
+  Supervisor:    ['vista_recepciones', 'vista_dashboard', 'vista_registro', 'vista_aprobacion',
                   'ind_general', 'ind_aprobacion'],
 }
 

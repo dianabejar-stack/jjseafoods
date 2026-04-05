@@ -543,8 +543,8 @@ function TablaRomaneo({ filas, onChange, onAgregar, onEliminar }) {
           <thead>
             <tr style={{ background: '#f9fafb' }}>
               {[
-                'Hora', 'Código/Romaneo', 'Proveedor', 'Especie', 'Presentación',
-                'Peso (lb)', 'N° Piezas', 'Presencia Hielo', 'T°C', 'Obj. Extraños',
+                'Hora', 'Código/Romaneo', 'Proveedor', 'Especie', 'Talla', 'Cal. Prov.',
+                'Presentación', 'Peso (lb)', 'N° Piezas', 'Presencia Hielo', 'T°C', 'Obj. Extraños',
                 'Color', 'Olor', 'Textura', 'Ojos', 'Branquias',
                 'Calificación', 'Clasificación', ''
               ].map((h) => (
@@ -607,6 +607,26 @@ function TablaRomaneo({ filas, onChange, onAgregar, onEliminar }) {
                     >
                       {ESPECIES_PESCADO.map((e) => <option key={e}>{e}</option>)}
                     </select>
+                  </td>
+                  {/* Talla */}
+                  <td style={tdStyle}>
+                    <input
+                      type="text"
+                      value={fila.talla}
+                      onChange={(e) => onChange(idx, 'talla', e.target.value)}
+                      placeholder="100+"
+                      style={{ ...estiloInput, width: 62, fontSize: 11, padding: '4px 6px' }}
+                    />
+                  </td>
+                  {/* Calidad proveedor */}
+                  <td style={tdStyle}>
+                    <input
+                      type="text"
+                      value={fila.calidadProveedor}
+                      onChange={(e) => onChange(idx, 'calidadProveedor', e.target.value)}
+                      placeholder="1+"
+                      style={{ ...estiloInput, width: 52, fontSize: 11, padding: '4px 6px' }}
+                    />
                   </td>
                   {/* Presentación */}
                   <td style={tdStyle}>
@@ -734,7 +754,7 @@ function TablaRomaneo({ filas, onChange, onAgregar, onEliminar }) {
             })}
             {/* Fila de totales */}
             <tr style={{ background: '#f0fdf8', borderTop: '2px solid #c8eedd', fontWeight: 700 }}>
-              <td colSpan={5} style={{ ...tdStyle, textAlign: 'right', color: COLOR.verde }}>TOTALES →</td>
+              <td colSpan={7} style={{ ...tdStyle, textAlign: 'right', color: COLOR.verde }}>TOTALES →</td>
               <td style={{ ...tdStyle, fontWeight: 700 }}>{totalPeso} lb</td>
               <td style={{ ...tdStyle, fontWeight: 700 }}>{totalPiezas}</td>
               <td colSpan={10} />
@@ -871,6 +891,8 @@ function FormCamaron({ onVolver, onGuardar, onRegisterGetDatos }) {
     jefeCC: '',
   })
 
+  const [esExportacion, setEsExportacion] = useState(false)
+
   const totalGramosDosis = datos.librasRecibidas
     ? (parseFloat(datos.librasRecibidas) * dosis.grPorLb).toFixed(2)
     : '—'
@@ -894,6 +916,7 @@ function FormCamaron({ onVolver, onGuardar, onRegisterGetDatos }) {
       totalGramos: totalGramosDosis !== '—' ? parseFloat(totalGramosDosis) : null,
     },
     firmas,
+    esExportacion,
   }
   // Se registra una sola vez al montar; el padre llama a esta función al guardar
   useEffect(() => {
@@ -1045,6 +1068,37 @@ function FormCamaron({ onVolver, onGuardar, onRegisterGetDatos }) {
           </Campo>
         </div>
       </Seccion>
+
+      {/* Exportación toggle — camarón */}
+      <div
+        style={{
+          background: esExportacion ? '#e0f2fe' : '#fff',
+          border: `1.5px solid ${esExportacion ? '#0284c7' : '#e5e7eb'}`,
+          borderRadius: 10,
+          padding: '12px 16px',
+          marginBottom: 14,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          cursor: 'pointer',
+        }}
+        onClick={() => setEsExportacion(v => !v)}
+      >
+        <input
+          type="checkbox"
+          checked={esExportacion}
+          onChange={e => setEsExportacion(e.target.checked)}
+          style={{ width: 18, height: 18, cursor: 'pointer', accentColor: '#0284c7' }}
+        />
+        <div>
+          <div style={{ fontWeight: 600, fontSize: 13, color: esExportacion ? '#0284c7' : '#374151' }}>
+            Producto destinado a exportación
+          </div>
+          <div style={{ fontSize: 11, color: '#6b7280', marginTop: 1 }}>
+            Marcar si esta recepción corresponde a un lote de exportación
+          </div>
+        </div>
+      </div>
 
       {/* Sección 2 - Tipo y presentación */}
       <Seccion numero="2" titulo="Tipo de Camarón y Presentación">
@@ -1498,7 +1552,8 @@ function FormPescado({ onVolver, onGuardar, onRegisterGetDatos }) {
     nroLote: '',
     romaneoNumero: '',
   })
-  const [presentacion, setPresentacion] = useState('Entero (HG)')
+  const [presentacion,  setPresentacion]  = useState('Entero (HG)')
+  const [esExportacion, setEsExportacion] = useState(false)
 
   // Sección 2 - Romaneo
   const filaVacia = () => ({
@@ -1507,6 +1562,8 @@ function FormPescado({ onVolver, onGuardar, onRegisterGetDatos }) {
     codigo: '',
     proveedor: PROVEEDORES[0],
     especie: 'Tuna YF',
+    talla: '',
+    calidadProveedor: '',
     presentacion: 'Entero',
     peso: '',
     nroPiezas: 1,
@@ -1555,6 +1612,7 @@ function FormPescado({ onVolver, onGuardar, onRegisterGetDatos }) {
     presentacion,
     romaneoFilas,
     firmas,
+    esExportacion,
   }
   useEffect(() => {
     onRegisterGetDatos(() => stateRef.current)
@@ -1623,6 +1681,37 @@ function FormPescado({ onVolver, onGuardar, onRegisterGetDatos }) {
           />
         </Campo>
       </Seccion>
+
+      {/* Exportación toggle — pescado */}
+      <div
+        style={{
+          background: esExportacion ? '#e0f2fe' : '#fff',
+          border: `1.5px solid ${esExportacion ? '#0284c7' : '#e5e7eb'}`,
+          borderRadius: 10,
+          padding: '12px 16px',
+          marginBottom: 14,
+          display: 'flex',
+          alignItems: 'center',
+          gap: 12,
+          cursor: 'pointer',
+        }}
+        onClick={() => setEsExportacion(v => !v)}
+      >
+        <input
+          type="checkbox"
+          checked={esExportacion}
+          onChange={e => setEsExportacion(e.target.checked)}
+          style={{ width: 18, height: 18, cursor: 'pointer', accentColor: '#0284c7' }}
+        />
+        <div>
+          <div style={{ fontWeight: 600, fontSize: 13, color: esExportacion ? '#0284c7' : '#374151' }}>
+            Producto destinado a exportación
+          </div>
+          <div style={{ fontSize: 11, color: '#6b7280', marginTop: 1 }}>
+            Marcar si esta recepción corresponde a un lote de exportación
+          </div>
+        </div>
+      </div>
 
       {/* Sección 2 - Control por pieza (romaneo) */}
       <Seccion numero="2" titulo="Control de Temperatura por Pieza (Romaneo)">

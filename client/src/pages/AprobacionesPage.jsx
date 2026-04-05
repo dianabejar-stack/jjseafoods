@@ -9,8 +9,8 @@ import api from '../api'
 const ESTADOS = [
   { value: 'todos',     label: 'Todos' },
   { value: 'pendiente', label: 'Pendientes' },
-  { value: 'aprobado',  label: 'Aprobados' },
-  { value: 'rechazado', label: 'Rechazados' },
+  { value: 'aprobado',  label: 'Revisión OK' },
+  { value: 'rechazado', label: 'Con observaciones' },
 ]
 const TIPOS = [
   { value: 'todos',   label: 'Todos' },
@@ -20,7 +20,13 @@ const TIPOS = [
 const COLOR_ESTADO = {
   pendiente: 'bg-yellow-100 text-yellow-800',
   aprobado:  'bg-green-100  text-green-800',
-  rechazado: 'bg-red-100    text-red-800',
+  rechazado: 'bg-orange-100 text-orange-800',
+}
+
+const LABEL_ESTADO = {
+  pendiente: 'Pendiente',
+  aprobado:  'Revisión OK',
+  rechazado: 'Con observaciones',
 }
 
 // ── KPI card ──────────────────────────────────────────────────────────────────
@@ -135,7 +141,7 @@ function ModalDetalle({ aprobacionId, onClose, onAprobar, onRechazar }) {
                     <table className="w-full text-xs border border-gray-200 rounded">
                       <thead className="bg-gray-50">
                         <tr>
-                          {['Hora', 'Especie', 'Peso (lb)', 'Temp.', 'Calif.', 'Clasif.'].map(h => (
+                          {['Hora', 'Especie', 'Talla', 'Cal. Prov.', 'Peso (lb)', 'Temp.', 'Calif.', 'Clasif.'].map(h => (
                             <th key={h} className="px-2 py-1.5 text-left font-semibold text-gray-600 border-b">{h}</th>
                           ))}
                         </tr>
@@ -145,6 +151,8 @@ function ModalDetalle({ aprobacionId, onClose, onAprobar, onRechazar }) {
                           <tr key={i} className="hover:bg-gray-50">
                             <td className="px-2 py-1.5">{String(r.hora || '').slice(0, 5) || '—'}</td>
                             <td className="px-2 py-1.5">{r.especie}</td>
+                            <td className="px-2 py-1.5">{r.talla || '—'}</td>
+                            <td className="px-2 py-1.5">{r.calidad_proveedor || '—'}</td>
                             <td className="px-2 py-1.5">{r.peso_lb}</td>
                             <td className="px-2 py-1.5">{r.temperatura != null ? `${r.temperatura}°C` : '—'}</td>
                             <td className="px-2 py-1.5">{r.calificacion}</td>
@@ -173,15 +181,15 @@ function ModalDetalle({ aprobacionId, onClose, onAprobar, onRechazar }) {
           <div className="px-6 py-4 border-t border-gray-200 flex gap-3 justify-end">
             <button
               onClick={() => { onRechazar(datos); onClose() }}
-              className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg transition"
+              className="px-4 py-2 bg-orange-500 hover:bg-orange-600 text-white text-sm rounded-lg transition"
             >
-              Rechazar
+              Revisión con observaciones
             </button>
             <button
               onClick={() => { onAprobar(datos); onClose() }}
               className="px-4 py-2 bg-[#1F7A63] hover:bg-[#185e4c] text-white text-sm rounded-lg transition"
             >
-              Aprobar
+              Revisión OK
             </button>
           </div>
         )}
@@ -212,7 +220,7 @@ function ModalAccion({ registro, accion, onConfirm, onClose }) {
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 px-4">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6 space-y-4">
         <h3 className="font-semibold text-gray-800">
-          {accion === 'aprobado' ? '✔ Aprobar' : '✘ Rechazar'} registro
+          {accion === 'aprobado' ? '✔ Revisión OK' : '✘ Revisión con observaciones'} — registro
         </h3>
         <p className="text-sm text-gray-600">
           <strong>{registro.tipo === 'camaron' ? 'Camarón' : 'Pescado'}</strong>{' '}
@@ -239,7 +247,7 @@ function ModalAccion({ registro, accion, onConfirm, onClose }) {
             onClick={handleConfirm}
             disabled={cargando || (accion === 'rechazado' && !observacion.trim())}
             className={`px-4 py-2 text-sm text-white rounded-lg transition disabled:opacity-50
-              ${accion === 'aprobado' ? 'bg-[#1F7A63] hover:bg-[#185e4c]' : 'bg-red-600 hover:bg-red-700'}`}
+              ${accion === 'aprobado' ? 'bg-[#1F7A63] hover:bg-[#185e4c]' : 'bg-orange-500 hover:bg-orange-600'}`}
           >
             {cargando ? 'Procesando...' : 'Confirmar'}
           </button>
@@ -292,8 +300,8 @@ export default function AprobacionesPage() {
 
       {/* Título */}
       <div>
-        <h2 className="text-xl font-bold text-gray-800">Aprobación de Registros</h2>
-        <p className="text-sm text-gray-500">Revisa y aprueba las recepciones de calidad ingresadas</p>
+        <h2 className="text-xl font-bold text-gray-800">Revisión de Registros</h2>
+        <p className="text-sm text-gray-500">Revisa las recepciones de calidad ingresadas y marca su resultado</p>
       </div>
 
       {/* KPIs */}
@@ -356,7 +364,7 @@ export default function AprobacionesPage() {
                     <td className="px-4 py-3">{reg.proveedor || '—'}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${COLOR_ESTADO[reg.estado]}`}>
-                        {reg.estado}
+                        {LABEL_ESTADO[reg.estado] ?? reg.estado}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-gray-500">{reg.aprobado_por_nombre || '—'}</td>
@@ -373,15 +381,15 @@ export default function AprobacionesPage() {
                           <>
                             <button
                               onClick={() => setModal({ registro: reg, accion: 'aprobado' })}
-                              className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded"
+                              className="px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs rounded whitespace-nowrap"
                             >
-                              Aprobar
+                              Revisión OK
                             </button>
                             <button
                               onClick={() => setModal({ registro: reg, accion: 'rechazado' })}
-                              className="px-2 py-1 bg-red-500 hover:bg-red-600 text-white text-xs rounded"
+                              className="px-2 py-1 bg-orange-500 hover:bg-orange-600 text-white text-xs rounded whitespace-nowrap"
                             >
-                              Rechazar
+                              Con observaciones
                             </button>
                           </>
                         )}

@@ -6,19 +6,23 @@
 import { useState } from 'react'
 import { useAuth, AuthProvider } from './context/AuthContext'
 
-import LoginPage          from './pages/LoginPage'
-import DashboardFiltrado  from './pages/DashboardFiltrado'
-import RecepcionCalidad   from './pages/RecepcionCalidad'
-import AprobacionesPage   from './pages/AprobacionesPage'
-import AdminUsuarios      from './pages/AdminUsuarios'
+import LoginPage           from './pages/LoginPage'
+import DashboardFiltrado   from './pages/DashboardFiltrado'
+import RecepcionCalidad    from './pages/RecepcionCalidad'
+import AprobacionesPage    from './pages/AprobacionesPage'
+import AdminUsuarios       from './pages/AdminUsuarios'
+import RecepcionesPage     from './pages/RecepcionesPage'
+import MantenimientosPage  from './pages/MantenimientosPage'
 
 // ── Vistas disponibles en el navbar ──────────────────────────────────────────
 // permiso: código requerido para que el botón aparezca
 const VISTAS = [
-  { id: 'dashboard',    label: 'Dashboard',       permiso: 'vista_dashboard'  },
-  { id: 'registro',     label: 'Nueva Recepción', permiso: 'vista_registro'   },
-  { id: 'aprobaciones', label: 'Aprobaciones',    permiso: 'vista_aprobacion' },
-  { id: 'admin',        label: 'Usuarios',        permiso: 'vista_admin'      },
+  { id: 'recepciones',  label: 'Recepciones',     permiso: 'vista_recepciones'    },
+  { id: 'dashboard',    label: 'Dashboard',        permiso: 'vista_dashboard'      },
+  { id: 'registro',     label: 'Nueva Recepción',  permiso: 'vista_registro'       },
+  { id: 'revisiones',   label: 'Revisiones',       permiso: 'vista_aprobacion'     },
+  { id: 'mantenimientos', label: 'Mantenimientos', permiso: 'vista_mantenimientos' },
+  { id: 'admin',        label: 'Usuarios',         permiso: 'vista_admin'          },
 ]
 
 // ── Layout principal (usuario autenticado) ────────────────────────────────────
@@ -95,10 +99,12 @@ function AppLayout() {
 
       {/* ── Contenido principal ─────────────────────────────────────── */}
       <main>
-        {vista === 'dashboard'    && <DashboardFiltrado onNavigate={setVista} />}
-        {vista === 'registro'     && <RecepcionCalidad  onVolver={() => setVista('dashboard')} />}
-        {vista === 'aprobaciones' && <AprobacionesPage />}
-        {vista === 'admin'        && <AdminUsuarios />}
+        {vista === 'recepciones'    && <RecepcionesPage />}
+        {vista === 'dashboard'      && <DashboardFiltrado onNavigate={setVista} />}
+        {vista === 'registro'       && <RecepcionCalidad  onVolver={() => setVista('dashboard')} />}
+        {vista === 'revisiones'     && <AprobacionesPage />}
+        {vista === 'mantenimientos' && <MantenimientosPage />}
+        {vista === 'admin'          && <AdminUsuarios />}
       </main>
     </div>
   )

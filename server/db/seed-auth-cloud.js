@@ -24,23 +24,26 @@ const ROLES = [
 ]
 
 const PERMISOS = [
-  { codigo: 'vista_dashboard',  descripcion: 'Ver el Dashboard',                categoria: 'vista' },
-  { codigo: 'vista_registro',   descripcion: 'Registrar productos del mar',      categoria: 'vista' },
-  { codigo: 'vista_aprobacion', descripcion: 'Revisar y aprobar registros',      categoria: 'vista' },
-  { codigo: 'vista_admin',      descripcion: 'Administrar usuarios y permisos',  categoria: 'vista' },
-  { codigo: 'ind_general',      descripcion: 'KPIs generales del dashboard',     categoria: 'indicador' },
-  { codigo: 'ind_camaron',      descripcion: 'Indicadores específicos camarón',  categoria: 'indicador' },
-  { codigo: 'ind_pescado',      descripcion: 'Indicadores específicos pescado',  categoria: 'indicador' },
-  { codigo: 'ind_aprobacion',   descripcion: 'Indicadores de aprobaciones',      categoria: 'indicador' },
+  { codigo: 'vista_recepciones',    descripcion: 'Ver listado de recepciones realizadas',    categoria: 'vista' },
+  { codigo: 'vista_dashboard',      descripcion: 'Ver el Dashboard',                         categoria: 'vista' },
+  { codigo: 'vista_registro',       descripcion: 'Registrar productos del mar',               categoria: 'vista' },
+  { codigo: 'vista_aprobacion',     descripcion: 'Revisar registros (revisiones)',            categoria: 'vista' },
+  { codigo: 'vista_mantenimientos', descripcion: 'Acceder a los mantenimientos del sistema', categoria: 'vista' },
+  { codigo: 'vista_admin',          descripcion: 'Administrar usuarios y permisos',          categoria: 'vista' },
+  { codigo: 'ind_general',          descripcion: 'KPIs generales del dashboard',             categoria: 'indicador' },
+  { codigo: 'ind_camaron',          descripcion: 'Indicadores específicos camarón',          categoria: 'indicador' },
+  { codigo: 'ind_pescado',          descripcion: 'Indicadores específicos pescado',          categoria: 'indicador' },
+  { codigo: 'ind_aprobacion',       descripcion: 'Indicadores de aprobaciones',              categoria: 'indicador' },
 ]
 
 const ROL_PERMISOS = {
-  Administrador: ['vista_dashboard', 'vista_registro', 'vista_aprobacion', 'vista_admin',
+  Administrador: ['vista_recepciones', 'vista_dashboard', 'vista_registro', 'vista_aprobacion',
+                  'vista_mantenimientos', 'vista_admin',
                   'ind_general', 'ind_camaron', 'ind_pescado', 'ind_aprobacion'],
-  Gerente:       ['vista_dashboard', 'vista_registro', 'vista_aprobacion',
+  Gerente:       ['vista_recepciones', 'vista_dashboard', 'vista_registro', 'vista_aprobacion',
                   'ind_general', 'ind_camaron', 'ind_pescado', 'ind_aprobacion'],
   Operativo:     ['vista_registro'],
-  Supervisor:    ['vista_dashboard', 'vista_registro', 'vista_aprobacion',
+  Supervisor:    ['vista_recepciones', 'vista_dashboard', 'vista_registro', 'vista_aprobacion',
                   'ind_general', 'ind_aprobacion'],
 }
 

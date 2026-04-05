@@ -37,15 +37,15 @@ router.post('/camaron', async (req, res) => {
     const {
       nroRecepcion, datos, tipo_camaron, estado,
       defectos, calidad, organolectica, condiciones,
-      gramaje, dosis, firmas,
+      gramaje, dosis, firmas, esExportacion,
     } = req.body
 
     // 1. Insertar cabecera
     const idProv = await buscarProveedor(client, datos.proveedor)
     const rec = await client.query(
-      `INSERT INTO recepciones_calidad (tipo, nro_recepcion, fecha, hora_llegada, id_proveedor)
-       VALUES ('camaron', $1, $2, $3, $4) RETURNING id`,
-      [nroRecepcion, datos.fecha, datos.horaLlegada, idProv]
+      `INSERT INTO recepciones_calidad (tipo, nro_recepcion, fecha, hora_llegada, id_proveedor, es_exportacion)
+       VALUES ('camaron', $1, $2, $3, $4, $5) RETURNING id`,
+      [nroRecepcion, datos.fecha, datos.horaLlegada, idProv, esExportacion || false]
     )
     const idRec = rec.rows[0].id
 
@@ -153,14 +153,14 @@ router.post('/pescado', async (req, res) => {
   try {
     await client.query('BEGIN')
 
-    const { nroRecepcion, datos, presentacion, romaneoFilas, firmas } = req.body
+    const { nroRecepcion, datos, presentacion, romaneoFilas, firmas, esExportacion } = req.body
 
     // 1. Cabecera
     const idProv = await buscarProveedor(client, datos.proveedor)
     const rec = await client.query(
-      `INSERT INTO recepciones_calidad (tipo, nro_recepcion, fecha, hora_llegada, id_proveedor)
-       VALUES ('pescado', $1, $2, $3, $4) RETURNING id`,
-      [nroRecepcion, datos.fecha, datos.hora, idProv]
+      `INSERT INTO recepciones_calidad (tipo, nro_recepcion, fecha, hora_llegada, id_proveedor, es_exportacion)
+       VALUES ('pescado', $1, $2, $3, $4, $5) RETURNING id`,
+      [nroRecepcion, datos.fecha, datos.hora, idProv, esExportacion || false]
     )
     const idRec = rec.rows[0].id
 
@@ -196,23 +196,25 @@ router.post('/pescado', async (req, res) => {
           id_recepcion, hora, codigo, id_proveedor, especie, presentacion,
           peso_lb, nro_piezas, presencia_hielo, temperatura, objetos_extranos,
           org_color, org_olor, org_textura, org_ojos, org_branquias,
-          calificacion, clasificacion
-        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)`,
+          calificacion, clasificacion, talla, calidad_proveedor
+        ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)`,
         [
           idRec,
-          fila.hora        || null,
-          fila.codigo      || null,
+          fila.hora              || null,
+          fila.codigo            || null,
           idProvFila,
           fila.especie,
           fila.presentacion,
-          fila.peso        || null,
-          fila.nroPiezas   || 1,
+          fila.peso              || null,
+          fila.nroPiezas         || 1,
           fila.presenciaHielo,
-          fila.temperatura || null,
+          fila.temperatura       || null,
           fila.objExtranos,
           fila.color, fila.olor, fila.textura, fila.ojos, fila.branquias,
           parseFloat(cal.toFixed(2)),
           clas,
+          fila.talla             || null,
+          fila.calidadProveedor  || null,
         ]
       )
     }
@@ -234,18 +236,106 @@ router.post('/pescado', async (req, res) => {
   }
 })
 
-// ─── GET / — Lista recepciones de calidad (últimas 100) ───────────────────
+// ─── GET / — Lista recepciones de calidad con filtros ─────────────────────
 router.get('/', async (req, res) => {
+  const { fecha_inicio, fecha_fin, tipo, proveedor, supervisor } = req.query
+  const params = []
+  const where  = []
+
+  // Por defecto muestra solo el día actual si no hay filtros de fecha
+  const inicio = fecha_inicio || new Date().toISOString().split('T')[0]
+  const fin    = fecha_fin    || new Date().toISOString().split('T')[0]
+
+  params.push(inicio); where.push(`rc.fecha >= $${params.length}`)
+  params.push(fin);    where.push(`rc.fecha <= $${params.length}`)
+
+  if (tipo && tipo !== 'todos') {
+    params.push(tipo); where.push(`rc.tipo = $${params.length}`)
+  }
+  if (proveedor && proveedor !== 'todos') {
+    params.push(proveedor); where.push(`p.nombre ILIKE $${params.length}`)
+  }
+
+  const clausula = where.length ? `WHERE ${where.join(' AND ')}` : ''
+
   try {
-    const result = await pool.query(`
-      SELECT rc.id, rc.tipo, rc.nro_recepcion, rc.fecha,
-             rc.hora_llegada, p.nombre AS proveedor, rc.created_at
+    let rows
+
+    if (supervisor && supervisor !== 'todos') {
+      // Filtrar por supervisor: puede estar en camaron_recepcion o pescado_recepcion
+      const result = await pool.query(`
+        SELECT rc.id, rc.tipo, rc.nro_recepcion, rc.fecha,
+               rc.hora_llegada, p.nombre AS proveedor,
+               rc.es_exportacion, rc.created_at,
+               COALESCE(cr.supervisor_cc, pr.elaborado_por) AS supervisor
+        FROM   recepciones_calidad rc
+        LEFT   JOIN proveedores p        ON p.id_proveedor  = rc.id_proveedor
+        LEFT   JOIN camaron_recepcion cr ON cr.id_recepcion = rc.id
+        LEFT   JOIN pescado_recepcion pr ON pr.id_recepcion = rc.id
+        ${clausula}
+        AND    COALESCE(cr.supervisor_cc, pr.elaborado_por) ILIKE $${params.length + 1}
+        ORDER  BY rc.fecha DESC, rc.created_at DESC
+        LIMIT  500
+      `, [...params, `%${supervisor}%`])
+      rows = result.rows
+    } else {
+      const result = await pool.query(`
+        SELECT rc.id, rc.tipo, rc.nro_recepcion, rc.fecha,
+               rc.hora_llegada, p.nombre AS proveedor,
+               rc.es_exportacion, rc.created_at,
+               COALESCE(cr.supervisor_cc, pr.elaborado_por) AS supervisor
+        FROM   recepciones_calidad rc
+        LEFT   JOIN proveedores p        ON p.id_proveedor  = rc.id_proveedor
+        LEFT   JOIN camaron_recepcion cr ON cr.id_recepcion = rc.id
+        LEFT   JOIN pescado_recepcion pr ON pr.id_recepcion = rc.id
+        ${clausula}
+        ORDER  BY rc.fecha DESC, rc.created_at DESC
+        LIMIT  500
+      `, params)
+      rows = result.rows
+    }
+
+    res.json(rows)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+})
+
+// ─── GET /:id/detalle — Detalle completo para modal Ver ───────────────────
+router.get('/:id/detalle', async (req, res) => {
+  try {
+    const cab = await pool.query(`
+      SELECT rc.id, rc.tipo, rc.nro_recepcion, rc.fecha, rc.hora_llegada,
+             rc.es_exportacion, p.nombre AS proveedor
       FROM   recepciones_calidad rc
       LEFT   JOIN proveedores p ON p.id_proveedor = rc.id_proveedor
-      ORDER  BY rc.created_at DESC
-      LIMIT  100
-    `)
-    res.json(result.rows)
+      WHERE  rc.id = $1
+    `, [req.params.id])
+
+    if (!cab.rows[0]) return res.status(404).json({ error: 'No encontrado' })
+
+    const { tipo } = cab.rows[0]
+    let detalle = null
+
+    if (tipo === 'camaron') {
+      const r = await pool.query(
+        'SELECT * FROM camaron_recepcion WHERE id_recepcion = $1',
+        [req.params.id]
+      )
+      detalle = r.rows[0] || null
+    } else {
+      const rCab = await pool.query(
+        'SELECT * FROM pescado_recepcion WHERE id_recepcion = $1',
+        [req.params.id]
+      )
+      const rRom = await pool.query(
+        'SELECT pr.*, p.nombre AS proveedor_nombre FROM pescado_romaneo pr LEFT JOIN proveedores p ON p.id_proveedor = pr.id_proveedor WHERE pr.id_recepcion = $1 ORDER BY pr.id',
+        [req.params.id]
+      )
+      detalle = { cabecera: rCab.rows[0] || null, romaneo: rRom.rows }
+    }
+
+    res.json({ ...cab.rows[0], detalle })
   } catch (err) {
     res.status(500).json({ error: err.message })
   }
