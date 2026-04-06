@@ -1555,6 +1555,53 @@ function FormPescado({ onVolver, onGuardar, onRegisterGetDatos }) {
   const [presentacion,  setPresentacion]  = useState('Entero (HG)')
   const [esExportacion, setEsExportacion] = useState(false)
 
+  // Sección 1b - Recepción física (tabla de productos con pesos)
+  const filaRecepcionVacia = () => ({
+    id:           Date.now() + Math.random(),
+    producto:     '',
+    talla:        '',
+    calidad:      '',
+    pesos:        ['', '', '', '', '', '', '', '', '', ''],
+    pesoTotal:    0,
+    descuentoPct: 9,
+    pesoNeto:     0,
+    observacion:  '',
+  })
+  const [recepcionFilas,    setRecepcionFilas]    = useState([filaRecepcionVacia()])
+  const [condTransporte,    setCondTransporte]    = useState({
+    transporte_limpio:  false,
+    suficiente_hielo:   false,
+    combustible_cerca:  false,
+    animales_cerca:     false,
+    objetos_cerca:      false,
+  })
+
+  function actualizarRecepcionFila(idx, campo, valor) {
+    setRecepcionFilas(prev => {
+      const copia = prev.map((f, i) => i === idx ? { ...f, [campo]: valor } : f)
+      // recalcular totales si cambia un peso o descuento
+      const fila = copia[idx]
+      const total = fila.pesos.reduce((s, p) => s + (parseFloat(p) || 0), 0)
+      const neto  = total * (1 - (parseFloat(fila.descuentoPct) || 0) / 100)
+      copia[idx]  = { ...fila, pesoTotal: parseFloat(total.toFixed(2)), pesoNeto: parseFloat(neto.toFixed(2)) }
+      return copia
+    })
+  }
+
+  function actualizarPesoRecepcion(idx, pesoIdx, valor) {
+    setRecepcionFilas(prev => {
+      const copia = prev.map((f, i) => {
+        if (i !== idx) return f
+        const pesos = [...f.pesos]
+        pesos[pesoIdx] = valor
+        const total = pesos.reduce((s, p) => s + (parseFloat(p) || 0), 0)
+        const neto  = total * (1 - (parseFloat(f.descuentoPct) || 0) / 100)
+        return { ...f, pesos, pesoTotal: parseFloat(total.toFixed(2)), pesoNeto: parseFloat(neto.toFixed(2)) }
+      })
+      return copia
+    })
+  }
+
   // Sección 2 - Romaneo
   const filaVacia = () => ({
     id: Date.now() + Math.random(),
@@ -1610,6 +1657,8 @@ function FormPescado({ onVolver, onGuardar, onRegisterGetDatos }) {
     nroRecepcion,
     datos,
     presentacion,
+    recepcionFilas,
+    condTransporte,
     romaneoFilas,
     firmas,
     esExportacion,
@@ -1682,6 +1731,108 @@ function FormPescado({ onVolver, onGuardar, onRegisterGetDatos }) {
         </Campo>
       </Seccion>
 
+      {/* Sección 1b - Recepción de Productos (pesos 1-10) */}
+      <Seccion numero="2" titulo="Recepción de Productos — Pesos y Piezas">
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12, minWidth: 900 }}>
+            <thead>
+              <tr style={{ background: COLOR.verde }}>
+                {['Producto', 'Talla', 'Calidad', '1','2','3','4','5','6','7','8','9','10',
+                  'Peso Total', '% Desc.', 'Peso Neto', 'Observación', ''].map(h => (
+                  <th key={h} style={{ ...thStyle, color: '#fff', fontSize: 11, whiteSpace: 'nowrap' }}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {recepcionFilas.map((fila, idx) => (
+                <tr key={fila.id} style={{ borderBottom: '1px solid #f3f4f6', background: idx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                  <td style={tdStyle}>
+                    <input type="text" value={fila.producto}
+                      onChange={e => actualizarRecepcionFila(idx, 'producto', e.target.value)}
+                      placeholder="Ej: Tuna YF"
+                      style={{ ...estiloInput, width: 90, fontSize: 11, padding: '3px 6px' }} />
+                  </td>
+                  <td style={tdStyle}>
+                    <input type="text" value={fila.talla}
+                      onChange={e => actualizarRecepcionFila(idx, 'talla', e.target.value)}
+                      placeholder="100+"
+                      style={{ ...estiloInput, width: 55, fontSize: 11, padding: '3px 6px' }} />
+                  </td>
+                  <td style={tdStyle}>
+                    <input type="text" value={fila.calidad}
+                      onChange={e => actualizarRecepcionFila(idx, 'calidad', e.target.value)}
+                      placeholder="1+"
+                      style={{ ...estiloInput, width: 45, fontSize: 11, padding: '3px 6px' }} />
+                  </td>
+                  {fila.pesos.map((p, pi) => (
+                    <td key={pi} style={tdStyle}>
+                      <input type="number" min="0" step="0.1" value={p}
+                        onChange={e => actualizarPesoRecepcion(idx, pi, e.target.value)}
+                        style={{ ...estiloInput, width: 52, fontSize: 11, padding: '3px 4px', textAlign: 'right' }} />
+                    </td>
+                  ))}
+                  <td style={{ ...tdStyle, fontWeight: 700, color: COLOR.verde, whiteSpace: 'nowrap' }}>
+                    {fila.pesoTotal > 0 ? fila.pesoTotal : '—'}
+                  </td>
+                  <td style={tdStyle}>
+                    <input type="number" min="0" max="100" step="0.1" value={fila.descuentoPct}
+                      onChange={e => actualizarRecepcionFila(idx, 'descuentoPct', e.target.value)}
+                      style={{ ...estiloInput, width: 48, fontSize: 11, padding: '3px 4px', textAlign: 'right' }} />
+                  </td>
+                  <td style={{ ...tdStyle, fontWeight: 700, whiteSpace: 'nowrap' }}>
+                    {fila.pesoNeto > 0 ? fila.pesoNeto : '—'}
+                  </td>
+                  <td style={tdStyle}>
+                    <input type="text" value={fila.observacion}
+                      onChange={e => actualizarRecepcionFila(idx, 'observacion', e.target.value)}
+                      placeholder="Observación"
+                      style={{ ...estiloInput, width: 100, fontSize: 11, padding: '3px 6px' }} />
+                  </td>
+                  <td style={{ ...tdStyle, textAlign: 'center' }}>
+                    {recepcionFilas.length > 1 && (
+                      <button type="button"
+                        onClick={() => setRecepcionFilas(prev => prev.filter((_, i) => i !== idx))}
+                        style={{ background: COLOR.rojoBg, color: COLOR.rojo, border: `1px solid ${COLOR.rojo}`,
+                          borderRadius: 5, padding: '3px 7px', fontSize: 11, cursor: 'pointer' }}>✕</button>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <button type="button"
+          onClick={() => setRecepcionFilas(prev => [...prev, filaRecepcionVacia()])}
+          style={{ marginTop: 10, background: COLOR.verdeBg, color: COLOR.verde,
+            border: `1.5px solid ${COLOR.verdeBorde}`, borderRadius: 7,
+            padding: '7px 16px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>
+          + Agregar fila
+        </button>
+
+        {/* Condiciones del transporte */}
+        <div style={{ marginTop: 18, borderTop: '1px solid #e5e7eb', paddingTop: 14 }}>
+          <div style={{ fontWeight: 600, fontSize: 13, color: COLOR.verde, marginBottom: 10 }}>
+            Condiciones del Transporte
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16 }}>
+            {[
+              { key: 'transporte_limpio',  label: 'El transporte se encuentra limpio' },
+              { key: 'suficiente_hielo',   label: 'Viene con suficiente hielo' },
+              { key: 'combustible_cerca',  label: 'Trae combustible junto a la materia prima' },
+              { key: 'animales_cerca',     label: 'Trae otros animales junto a la materia prima' },
+              { key: 'objetos_cerca',      label: 'Trae otros objetos junto a la materia prima' },
+            ].map(({ key, label }) => (
+              <label key={key} style={{ display: 'flex', alignItems: 'center', gap: 7, fontSize: 12, cursor: 'pointer' }}>
+                <input type="checkbox" checked={condTransporte[key]}
+                  onChange={e => setCondTransporte(p => ({ ...p, [key]: e.target.checked }))}
+                  style={{ width: 15, height: 15 }} />
+                {label}
+              </label>
+            ))}
+          </div>
+        </div>
+      </Seccion>
+
       {/* Exportación toggle — pescado */}
       <div
         style={{
@@ -1713,8 +1864,8 @@ function FormPescado({ onVolver, onGuardar, onRegisterGetDatos }) {
         </div>
       </div>
 
-      {/* Sección 2 - Control por pieza (romaneo) */}
-      <Seccion numero="2" titulo="Control de Temperatura por Pieza (Romaneo)">
+      {/* Sección 3 - Control por pieza (romaneo) */}
+      <Seccion numero="3" titulo="Control de Temperatura por Pieza (Romaneo)">
         <TablaRomaneo
           filas={romaneoFilas}
           onChange={actualizarFila}
@@ -1723,8 +1874,8 @@ function FormPescado({ onVolver, onGuardar, onRegisterGetDatos }) {
         />
       </Seccion>
 
-      {/* Sección 3 - Observaciones y firmas */}
-      <Seccion numero="3" titulo="Observaciones y Firmas">
+      {/* Sección 4 - Observaciones y firmas */}
+      <Seccion numero="4" titulo="Observaciones y Firmas">
         <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           <Campo label="Observaciones">
             <textarea
